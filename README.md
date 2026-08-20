@@ -9,7 +9,7 @@
 [![ChromaDB](https://img.shields.io/badge/VectorDB-ChromaDB%20Persistent-red.svg)](https://www.trychroma.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**👉 [LIVE LINK ]([https://edushield-ai-early-student-dropout-risk-detection-and-support.streamlit.app](https://agentic-rag-doc-assistant-web.streamlit.app/))**
+**👉 [LIVE LINK ]([https://edushield-ai-early-student-dropout-risk-detection-and-support.streamlit.app](https://agentic-rag-doc-assistant-web.streamlit.app/)**
 ---
 
 ## 📑 Table of Contents
