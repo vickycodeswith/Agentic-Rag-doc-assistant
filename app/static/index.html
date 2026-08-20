@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAG Technical Documentation Assistant | Express Analytics</title>
+  <!-- Google Fonts & Tailwind-free Custom Modern CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(31, 41, 55, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(59, 130, 246, 0.4);
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.12) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Container Layout */
+    .app-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: white;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+
+    .brand h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .stat-pill strong {
+      color: var(--accent-cyan);
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Card Box */
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Query Section */
+    .query-box {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      gap: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      background: rgba(10, 14, 23, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      padding: 14px 16px;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      resize: vertical;
+      min-height: 85px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    textarea:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 2px var(--border-glow);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+      color: white;
+      border: none;
+      padding: 0 24px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Sample Questions */
+    .sample-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .sample-chips span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip:hover {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-cyan);
+      border-color: var(--accent-blue);
+    }
+
+    /* Answer Container */
+    .answer-container {
+      margin-top: 20px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .telemetry-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tag-type { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .tag-grounded { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-retry { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-latency { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+    .answer-body {
+      background: rgba(10, 14, 23, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    /* Citations */
+    .citations-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .citations-section h4 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .citations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .citation-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 0.8rem;
+    }
+
+    .citation-card strong {
+      color: var(--accent-cyan);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .citation-card span {
+      color: var(--text-secondary);
+    }
+
+    /* Feedback & Actions */
+    .feedback-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+    }
+
+    .feedback-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-feedback {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .btn-feedback:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    /* Execution Trace Accordion */
+    details.trace-details {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 0.85rem;
+    }
+
+    details.trace-details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent-blue);
+      outline: none;
+    }
+
+    .trace-timeline {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .trace-step {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-left: 3px solid var(--accent-cyan);
+      padding: 8px 12px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    /* Sidebar tabs */
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .doc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .doc-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-size: 0.85rem;
+    }
+
+    .doc-item strong {
+      color: var(--accent-blue);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .doc-item .meta {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <span class="brand-badge">LANGGRAPH RAG</span>
+        <div>
+          <h1>Technical Documentation Assistant</h1>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Self-Corrective RAG with Document Grading & Groundedness Verification</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-pill" id="stat-provider">LLM: <strong>Gemini</strong></div>
+        <div class="stat-pill" id="stat-chunks">Indexed: <strong>0 Chunks</strong></div>
+        <a href="/docs" target="_blank" class="stat-pill" style="text-decoration: none; color: var(--accent-blue);">API Docs ↗</a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-grid">
+      <!-- Left Column: Query Interface -->
+      <main class="glass-card query-box">
+        <div class="input-wrapper">
+          <textarea id="queryInput" placeholder="Ask any question about FastAPI, LangGraph, Pydantic v2, or ChromaDB..."></textarea>
+          <button id="submitBtn" class="btn-primary" onclick="handleQuery()">
+            <span>Ask</span> ⚡
+          </button>
+        </div>
+
+        <div class="sample-chips">
+          <span>Try asking:</span>
+          <div class="chip" onclick="setQuery('How do you declare query parameters and validation in FastAPI?')">FastAPI Query Params</div>
+          <div class="chip" onclick="setQuery('What is the difference between StateGraph and MessageGraph in LangGraph?')">LangGraph StateGraph</div>
+          <div class="chip" onclick="setQuery('Show how to create a Pydantic v2 validator using @field_validator.')">Pydantic v2 Validators</div>
+          <div class="chip" onclick="setQuery('How does ChromaDB persist data and calculate cosine similarity?')">ChromaDB Persistence</div>
+          <div class="chip" onclick="setQuery('What is the recipe for baking a chocolate cake?')">Out-of-Scope Fallback</div>
+        </div>
+
+        <!-- Answer View -->
+        <div id="answerSection" class="answer-container" style="display: none;">
+          <div class="telemetry-bar">
+            <span class="tag tag-type" id="tagType">HOW-TO</span>
+            <span class="tag tag-grounded" id="tagGrounded">GROUNDED (100%)</span>
+            <span class="tag tag-retry" id="tagRetries">RETRIES: 0</span>
+            <span class="tag tag-latency" id="tagLatency">1.2s</span>
+          </div>
+
+          <div class="answer-body" id="answerBody"></div>
+
+          <!-- Citations -->
+          <div class="citations-section" id="citationsSection">
+            <h4>Verified Source Citations</h4>
+            <div class="citations-grid" id="citationsGrid"></div>
+          </div>
+
+          <!-- Execution Trace -->
+          <details class="trace-details">
+            <summary>View LangGraph Execution Trace & Decisions</summary>
+            <div class="trace-timeline" id="traceTimeline"></div>
+          </details>
+
+          <!-- Feedback -->
+          <div class="feedback-row">
+            <span style="font-size: 0.85rem; color: var(--text-secondary);">Was this response technically accurate?</span>
+            <div class="feedback-buttons">
+              <button class="btn-feedback" onclick="submitFeedback('up')">👍 Helpful</button>
+              <button class="btn-feedback" onclick="submitFeedback('down')">👎 Inaccurate</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Column: Document Corpus & Ingestion -->
+      <aside class="glass-card sidebar-section">
+        <h3>
+          <span>Document Corpus</span>
+          <button class="chip" onclick="loadDocuments()" style="cursor: pointer;">Refresh</button>
+        </h3>
+        
+        <div class="doc-list" id="docList">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 20px;">
+            Loading indexed documents...
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 16px;">
+          <h4 style="font-size: 0.85rem; margin-bottom: 10px; color: var(--text-secondary);">Ingest Web Documentation (URL)</h4>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="urlInput" placeholder="https://..." style="flex: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px; color: white; font-size: 0.8rem; outline: none;">
+            <button class="btn-primary" style="padding: 0 14px; font-size: 0.8rem;" onclick="handleIngestUrl()">Ingest</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    let currentQuery = "";
+    let currentAnswer = "";
+
+    async function loadHealth() {
+      try {
+        const res = await fetch("/api/v1/health");
+        const data = await res.json();
+        document.getElementById("stat-provider").innerHTML = `LLM: <strong>${data.llm_provider.toUpperCase()} (${data.llm_model})</strong>`;
+        document.getElementById("stat-chunks").innerHTML = `Indexed: <strong>${data.indexed_chunks} Chunks</strong>`;
+      } catch (err) {
+        console.error("Health check error:", err);
+      }
+    }
+
+    async function loadDocuments() {
+      try {
+        const res = await fetch("/api/v1/documents");
+        const data = await res.json();
+        const listEl = document.getElementById("docList");
+        if (!data.documents || data.documents.length === 0) {
+          listEl.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 20px;">No documents indexed yet. Run ingestion!</div>';
+          return;
+        }
+        listEl.innerHTML = data.documents.map(d => `
+          <div class="doc-item">
+            <strong>${d.title}</strong>
+            <div class="meta">${d.total_chunks} chunks • ${d.source_type}</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">
+              ${d.sections.slice(0, 3).join(" • ")}
+            </div>
+          </div>
+        `).join("");
+      } catch (err) {
+        console.error("Error loading documents:", err);
+      }
+    }
+
+    function setQuery(q) {
+      document.getElementById("queryInput").value = q;
+      handleQuery();
+    }
+
+    async function handleQuery() {
+      const input = document.getElementById("queryInput");
+      const submitBtn = document.getElementById("submitBtn");
+      const answerSection = document.getElementById("answerSection");
+      const q = input.value.trim();
+      if (!q) return;
+
+      currentQuery = q;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="spinner"></span> Thinking...`;
+
+      try {
+        const res = await fetch("/api/v1/query", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: q, max_retries: 2 })
+        });
+        const data = await res.json();
+
+        currentAnswer = data.answer;
+        answerSection.style.display = "flex";
+
+        document.getElementById("tagType").innerText = `TYPE: ${data.query_type.toUpperCase()}`;
+        document.getElementById("tagGrounded").innerText = data.is_grounded 
+          ? `GROUNDED (${Math.round(data.groundedness_score * 100)}%)` 
+          : "UNGROUNDED";
+        document.getElementById("tagRetries").innerText = `RETRIES: ${data.retry_count}`;
+        document.getElementById("tagLatency").innerText = `${data.latency_seconds}s`;
+
+        document.getElementById("answerBody").innerText = data.answer;
+
+        // Render citations
+        const citGrid = document.getElementById("citationsGrid");
+        if (data.citations && data.citations.length > 0) {
+          citGrid.innerHTML = data.citations.map(c => `
+            <div class="citation-card">
+              <strong>${c.doc_title || c.source}</strong>
+              <span>${c.section_title}</span>
+            </div>
+          `).join("");
+          document.getElementById("citationsSection").style.display = "block";
+        } else {
+          document.getElementById("citationsSection").style.display = "none";
+        }
+
+        // Render trace
+        const timeline = document.getElementById("traceTimeline");
+        timeline.innerHTML = data.execution_trace.map(t => `
+          <div class="trace-step">
+            <strong>[Step ${t.step_number}: ${t.node_name}]</strong> ${JSON.stringify(t.details)}
+          </div>
+        `).join("");
+
+        loadHealth();
+      } catch (err) {
+        alert("Query error: " + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Ask</span> ⚡`;
+      }
+    }
+
+    async function handleIngestUrl() {
+      const urlInput = document.getElementById("urlInput");
+      const url = urlInput.value.trim();
+      if (!url) return;
+
+      try {
+        const res = await fetch("/api/v1/ingest/url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: url })
+        });
+        const data = await res.json();
+        alert(`Successfully indexed: ${data.doc_title} (${data.chunks_created} chunks)`);
+        urlInput.value = "";
+        loadDocuments();
+        loadHealth();
+      } catch (err) {
+        alert("Ingestion error: " + err.message);
+      }
+    }
+
+    async function submitFeedback(rating) {
+      try {
+        await fetch("/api/v1/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            rating: rating,
+            query: currentQuery,
+            answer: currentAnswer
+          })
+        });
+        alert("Thank you for your feedback!");
+      } catch (err) {
+        console.error("Feedback error:", err);
+      }
+    }
+
+    // Initial load
+    loadHealth();
+    loadDocuments();
+  </script>
+</body>
+</html>
