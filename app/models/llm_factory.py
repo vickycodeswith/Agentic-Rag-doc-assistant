@@ -161,18 +161,33 @@ def get_llm(
         if not settings.GOOGLE_API_KEY:
             logger.warning("GOOGLE_API_KEY is not set. Falling back to MockChatModel for offline safety.")
             return MockChatModel()
+        
+        target_model = model
+        if target_model in ["gemini-1.5-flash", "models/gemini-1.5-flash"]:
+            target_model = "gemini-2.5-flash"
+
         try:
             from langchain_google_genai import ChatGoogleGenerativeAI
-            logger.info(f"Initialized Google Gemini Chat LLM ({model})")
+            logger.info(f"Initialized Google Gemini Chat LLM ({target_model})")
             return ChatGoogleGenerativeAI(
-                model=model,
+                model=target_model,
                 temperature=temp,
                 max_output_tokens=max_t,
                 google_api_key=settings.GOOGLE_API_KEY
             )
         except Exception as e:
-            logger.error(f"Failed to initialize Gemini model: {e}")
-            raise ModelProviderError(f"Gemini initialization error: {e}")
+            logger.warning(f"Failed with {target_model}: {e}. Retrying with 'gemini-flash-latest'...")
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+                return ChatGoogleGenerativeAI(
+                    model="gemini-flash-latest",
+                    temperature=temp,
+                    max_output_tokens=max_t,
+                    google_api_key=settings.GOOGLE_API_KEY
+                )
+            except Exception as e2:
+                logger.error(f"Failed to initialize Gemini model: {e2}")
+                raise ModelProviderError(f"Gemini initialization error: {e2}")
 
     elif selected_provider == LLMProvider.GROQ:
         if not settings.GROQ_API_KEY:

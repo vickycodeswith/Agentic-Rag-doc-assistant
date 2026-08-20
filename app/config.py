@@ -76,7 +76,7 @@ class Settings(BaseSettings):
             return self.LLM_MODEL_NAME
         match self.LLM_PROVIDER:
             case LLMProvider.GEMINI:
-                return "gemini-1.5-flash"
+                return "gemini-2.5-flash"
             case LLMProvider.GROQ:
                 return "llama-3.3-70b-versatile"
             case LLMProvider.OPENAI:
