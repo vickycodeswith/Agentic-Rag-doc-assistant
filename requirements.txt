@@ -6,6 +6,9 @@ pydantic-settings>=2.4.0
 python-multipart>=0.0.9
 aiofiles>=24.1.0
 
+# Streamlit UI for Streamlit Cloud Deployment
+streamlit>=1.38.0
+
 # LangGraph & LangChain Ecosystem
 langgraph>=0.2.20
 langchain>=0.3.0
